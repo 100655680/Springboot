@@ -1,12 +1,17 @@
 package com.dartsapp.model;
 
 public class SignalingMessage {
-    private String type;    // e.g., "offer", "answer", "candidate"
-    private String from;    // sender's username
-    private String to;      // recipient's username
-    private Object payload; // the actual signaling data (offer, answer, ICE candidate)
+    private String type;    // "game-invite" | "offer" | "answer" | "candidate"
+    private String from;    // sender username
+    private String to;      // recipient username
+    private Object payload; // for "invite" → gameId (Long), for offer/answer → RTCSessionDescription, etc.
 
-    public SignalingMessage() {
+    public SignalingMessage() {}
+    public SignalingMessage(String type, String from, String to, Object payload) {
+        this.type = type;
+        this.from = from;
+        this.to = to;
+        this.payload = payload;
     }
 
     // Getters and setters
