@@ -10,14 +10,16 @@ import com.dartsapp.repository.GameTurnRepository;
 import com.dartsapp.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/games")
 public class GameController {
-    @Autowired private GameRepository     gameRepo;
-    @Autowired private UserRepository     userRepo;
-    @Autowired private GameTurnRepository turnRepo;
-    @Autowired private GameStatRepository statRepo;
+    @Autowired private GameRepository      gameRepo;
+    @Autowired private UserRepository      userRepo;
+    @Autowired private GameTurnRepository  turnRepo;
+    @Autowired private GameStatRepository  statRepo;
 
     /**
      * Start a new game. Pass both opponentId and your username.
@@ -28,21 +30,30 @@ public class GameController {
         @RequestParam Long opponentId,
         @RequestParam String requester
     ) {
-        // lookup both players by username and ID
-        User me       = userRepo.findByUsername(requester)
-                         .orElseThrow(() -> new RuntimeException("Unknown user: " + requester));
-        User opponent = userRepo.findById(opponentId)
-                         .orElseThrow(() -> new RuntimeException("Unknown opponent ID: " + opponentId));
+        User me = userRepo.findByUsername(requester)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Unknown user: " + requester
+                )
+            );
+        User opp = userRepo.findById(opponentId)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Unknown opponent ID: " + opponentId
+                )
+            );
 
         // create the Game entry
         Game game = gameRepo.save(new Game());
+        Long gid = game.getGameId();
 
         // seed stats for both players
-        Long gid = game.getGameId();
-        GameStat.StatId sid1 = new GameStat.StatId(gid, me.getId().longValue());
-        GameStat.StatId sid2 = new GameStat.StatId(gid, opponent.getId().longValue());
-        statRepo.save(new GameStat(sid1));
-        statRepo.save(new GameStat(sid2));
+        GameStat.StatId sidMe  = new GameStat.StatId(gid, me.getId().longValue());
+        GameStat.StatId sidOpp = new GameStat.StatId(gid, opp.getId().longValue());
+        statRepo.save(new GameStat(sidMe));
+        statRepo.save(new GameStat(sidOpp));
 
         return gid;
     }
@@ -58,11 +69,22 @@ public class GameController {
         @RequestParam(defaultValue = "3") int dartsThrown,
         @RequestParam String requester
     ) {
-        User me   = userRepo.findByUsername(requester)
-                         .orElseThrow(() -> new RuntimeException("Unknown user: " + requester));
+        User me = userRepo.findByUsername(requester)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Unknown user: " + requester
+                )
+            );
         Game game = gameRepo.findById(gameId)
-                         .orElseThrow(() -> new RuntimeException("Unknown game: " + gameId));
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Unknown game ID: " + gameId
+                )
+            );
 
+        // compute next turn number
         int turnNumber = turnRepo.countByGameAndUser(game, me) + 1;
 
         // save the turn
@@ -74,10 +96,10 @@ public class GameController {
         turn.setDartsThrown(dartsThrown);
         turnRepo.save(turn);
 
-        // update stats
+        // update stats (or create if missing)
         GameStat.StatId sid = new GameStat.StatId(gameId, me.getId().longValue());
         GameStat stats = statRepo.findById(sid)
-                          .orElseThrow(() -> new RuntimeException("No stats for user/game"));
+            .orElseGet(() -> new GameStat(sid));
         stats.setTotalDarts(stats.getTotalDarts() + dartsThrown);
         if (score == 120) stats.setCount120s(stats.getCount120s() + 1);
         else if (score == 140) stats.setCount140s(stats.getCount140s() + 1);

@@ -14,10 +14,12 @@ public class GlobalCorsConfig {
         config.setAllowCredentials(true);
         // Allow your Netlify URL and your ngrok URL
         config.addAllowedOrigin("https://inspiring-mooncake-b7e422.netlify.app");
-        config.addAllowedOrigin("https://1179-89-243-126-132.ngrok-free.app");
-        config.addAllowedOrigin("https://1179-89-243-126-132.ngrok-free.app/api/users");
+        config.addAllowedOrigin("https://briefing-tion-saved-nb.trycloudflare.com");
+        config.addAllowedOrigin("https://briefing-tion-saved-nb.trycloudflare.com/api/users");
         config.addAllowedOrigin("https://preeminent-sfogliatella-bb63cf.netlify.app");
         config.addAllowedOrigin("http://localhost:5173");   
+        config.addAllowedOrigin("http://192.168.4.20:5173");       
+        config.addAllowedOrigin("http://192.168.4.20:8080");  
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         
