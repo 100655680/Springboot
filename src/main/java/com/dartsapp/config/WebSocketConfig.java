@@ -1,4 +1,8 @@
+// src/main/java/com/dartsapp/config/WebSocketConfig.java
 package com.dartsapp.config;
+
+import java.security.Principal;
+import java.util.Map;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
@@ -11,9 +15,6 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
-
-import java.security.Principal;
-import java.util.Map;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -59,16 +60,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                   return super.determineUser(request, wsHandler, attributes);
               }
           });
-
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // prefix for @MessageMapping methods
+        // messages from @MessageMapping go to /app/**
         registry.setApplicationDestinationPrefixes("/app");
-        // broker for simple in-memory topics and queues
+        // enable simple in-memory /topic and /queue broker
         registry.enableSimpleBroker("/topic", "/queue");
-        // prefix for user destinations (/user/{username}/...)
+        // enable /user/{username}/... destinations
         registry.setUserDestinationPrefix("/user");
     }
 }

@@ -1,3 +1,4 @@
+// src/main/java/com/dartsapp/controller/SignalingController.java
 package com.dartsapp.controller;
 
 import com.dartsapp.model.SignalingMessage;
@@ -7,14 +8,19 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class SignalingController {
+
     private final SimpMessagingTemplate template;
+
     public SignalingController(SimpMessagingTemplate template) {
         this.template = template;
     }
 
+    /**
+     * Receive ANY signaling message (offer, answer, candidate, turn, etc.)
+     * and forward it to the specific user's private queue.
+     */
     @MessageMapping("/signaling")
     public void onSignal(SignalingMessage msg) {
-        // send directly to the target user’s private queue
         template.convertAndSendToUser(
             msg.getTo(),
             "/queue/signaling",
