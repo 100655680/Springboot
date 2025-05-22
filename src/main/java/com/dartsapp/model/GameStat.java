@@ -33,6 +33,8 @@ public class GameStat {
     @EmbeddedId
     private StatId id;
 
+    @Column(name="count_100", nullable=false)
+    private int count100 = 0;
     @Column(name="count_100_plus", nullable=false)
     private int count100Plus = 0;
     @Column(name="count_120s",      nullable=false)
@@ -54,6 +56,9 @@ public class GameStat {
     public StatId getId()  { return id; }
     public void   setId(StatId id)  { this.id = id; }
 
+    public int getCount100() { return count100; }
+    public void setCount100(int count100) { this.count100 = count100; }
+
     public int getCount100Plus() { return count100Plus; }
     public void setCount100Plus(int c) { this.count100Plus = c; }
 
@@ -68,4 +73,14 @@ public class GameStat {
 
     public int getTotalDarts() { return totalDarts; }
     public void setTotalDarts(int t) { this.totalDarts = t; }
+
+    @Transient
+public double getAverageScore() {
+    // totalDarts is number of darts thrown; to compute avg per turn
+    // you’d need totalTurns or totalScore in the table
+    // here’s an example if you had totalScore column:
+    // return totalDarts>0 ? ((double) totalScore / totalDarts) * 3 : 0;
+    return 0;  // stub: replace with your actual calculation or remove if not needed
+}
+
 }

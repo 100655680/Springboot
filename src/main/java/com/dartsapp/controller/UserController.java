@@ -61,7 +61,7 @@ public class UserController {
         }
 
         user.setMainStatus("online");
-        user.setSubStatus("available");
+        user.setSubStatus("away");
         userRepository.save(user);
         return ResponseEntity.ok(user);
     }
